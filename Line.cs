@@ -4,12 +4,20 @@ namespace Geometry
 {
     public class Line : GeometricEquation
     {
-        public Line(double a, double b, double c) : base(a, b, c) { }
+        public Line(double a, double b, double c) : base(a, b, c)
+        {
+            if (Math.Abs(a) < Epsilon && Math.Abs(b) < Epsilon)
+                throw new ArgumentException("For a 2D line, A and B cannot both be zero.");
+        }
 
         public override bool BelongsToShape(params double[] coords)
-            => Math.Abs(Evaluate(coords)) < Epsilon;
+        {
+            return Math.Abs(Evaluate(coords)) < Epsilon;
+        }
 
         public override string ToString()
-            => FormatEquation(new[] { "x", "y" });
+        {
+            return FormatEquation(new[] { "x", "y" });
+        }
     }
 }

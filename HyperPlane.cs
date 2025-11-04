@@ -5,16 +5,20 @@ namespace Geometry
 {
     public class HyperPlane : GeometricEquation
     {
-        public HyperPlane(params double[] coefficients) : base(coefficients) { }
+        public HyperPlane(params double[] coefficients) : base(coefficients)
+        {
+            if (coefficients.Length != 5)
+                throw new ArgumentException("4D hyperplane requires exactly 5 coefficients (A, B, C, D, E).");
+        }
 
         public override bool BelongsToShape(params double[] coords)
-            => Math.Abs(Evaluate(coords)) < Epsilon;
+        {
+            return Math.Abs(Evaluate(coords)) < Epsilon;
+        }
 
         public override string ToString()
         {
-            var vars = Enumerable.Range(1, _coefficients.Length - 1)
-                                 .Select(i => $"x{i}")
-                                 .ToArray();
+            string[] vars = { "x1", "x2", "x3", "x4" };
             return FormatEquation(vars);
         }
     }

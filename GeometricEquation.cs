@@ -9,12 +9,16 @@ namespace Geometry
         protected readonly double[] _coefficients;
         protected const double Epsilon = 1e-12;
 
+        public IReadOnlyList<double> Coefficients => _coefficients;
+
         protected GeometricEquation(params double[] coefficients)
         {
             if (coefficients == null)
                 throw new ArgumentNullException(nameof(coefficients));
+
             if (coefficients.Length == 0)
                 throw new ArgumentException("At least one coefficient is required.");
+
             if (coefficients.All(c => Math.Abs(c) < Epsilon))
                 throw new ArgumentException("All coefficients cannot be zero.");
 
@@ -25,17 +29,16 @@ namespace Geometry
         {
             if (coords == null)
                 throw new ArgumentNullException(nameof(coords));
+
             if (coords.Length != _coefficients.Length - 1)
                 throw new ArgumentException($"Expected {_coefficients.Length - 1} coordinates.");
 
-            double sum = _coefficients[^1]; // вільний член
+            double sum = _coefficients[^1];
             for (int i = 0; i < coords.Length; i++)
                 sum += _coefficients[i] * coords[i];
 
             return sum;
         }
-
-        public abstract bool BelongsToShape(params double[] coords);
 
         protected string FormatEquation(string[] vars)
         {
@@ -51,7 +54,12 @@ namespace Geometry
                 else if (c < 0)
                     sb.Append("- ");
 
-                sb.Append($"{Math.Abs(c):0.###}{vars[i]}");
+                double abs = Math.Abs(c);
+
+                if (Math.Abs(abs - 1) > Epsilon)
+                    sb.Append($"{abs:0.###}");
+
+                sb.Append(vars[i]);
             }
 
             double free = _coefficients[^1];
@@ -62,7 +70,8 @@ namespace Geometry
             return sb.ToString();
         }
 
-        // ✅ Реалізуємо контракт інтерфейсу
+        public abstract bool BelongsToShape(params double[] coords);
+
         public virtual string PrintEquation() => ToString();
     }
 }
