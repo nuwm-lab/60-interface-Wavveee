@@ -1,34 +1,64 @@
-using System;
-
-public abstract class GeometricEquation : IShape
+namespace Geometry
 {
-    private readonly double _a;
-    private readonly double _b;
-    private readonly double _c;
-
-    protected const double Epsilon = 1e-12;
-
-    protected GeometricEquation(double a, double b, double c)
+    public abstract class GeometricEquation : IShape
     {
-        _a = a;
-        _b = b;
-        _c = c;
-    }
+        protected readonly double[] _coefficients;
+        protected const double Epsilon = 1e-12;
 
-    protected double A => _a;
-    protected double B => _b;
-    protected double C => _c;
+        protected GeometricEquation(params double[] coefficients)
+        {
+            if (coefficients == null)
+                throw new ArgumentNullException(nameof(coefficients));
 
-    public abstract string PrintEquation();
-    public abstract bool BelongsToShape(params double[] coordinates);
+            if (coefficients.Length == 0)
+                throw new ArgumentException("At least one coefficient must be provided.");
 
-    protected string FormatTerm(double coefficient, string variable)
-    {
-        if (Math.Abs(coefficient) < Epsilon) return string.Empty;
+            if (coefficients.All(c => Math.Abs(c) < Epsilon))
+                throw new ArgumentException("All coefficients cannot be zero.");
 
-        string sign = coefficient > 0 ? " + " : " - ";
-        double value = Math.Abs(coefficient);
+            _coefficients = coefficients;
+        }
 
-        return $"{sign}{value}*{variable}";
+        protected virtual double Evaluate(params double[] coords)
+        {
+            if (coords == null)
+                throw new ArgumentNullException(nameof(coords));
+
+            if (coords.Length != _coefficients.Length - 1)
+                throw new ArgumentException($"Expected {_coefficients.Length - 1} coordinates.");
+
+            double sum = _coefficients[^1]; // free term
+            for (int i = 0; i < coords.Length; i++)
+                sum += _coefficients[i] * coords[i];
+
+            return sum;
+        }
+
+        public abstract bool BelongsToShape(params double[] coords);
+
+        protected string FormatEquation(string[] variableNames)
+        {
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < _coefficients.Length - 1; i++)
+            {
+                double c = _coefficients[i];
+                if (Math.Abs(c) < Epsilon) continue;
+
+                if (sb.Length > 0)
+                    sb.Append(c >= 0 ? " + " : " - ");
+                else if (c < 0)
+                    sb.Append("- ");
+
+                sb.Append($"{Math.Abs(c)}{variableNames[i]}");
+            }
+
+            double free = _coefficients[^1];
+            if (Math.Abs(free) >= Epsilon)
+                sb.Append(free >= 0 ? $" + {free}" : $" - {Math.Abs(free)}");
+
+            sb.Append(" = 0");
+            return sb.ToString();
+        }
     }
 }
