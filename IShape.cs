@@ -2,16 +2,12 @@ using System;
 
 namespace Geometry
 {
+    /// <summary>
+    /// Represents a geometric object that can check point belonging and return its equation.
+    /// </summary>
     public interface IShape
     {
-        /// <summary>
-        /// Checks whether a point belongs to the geometric object.
-        /// </summary>
         bool BelongsToShape(params double[] coords);
-
-        /// <summary>
-        /// Returns equation as formatted string.
-        /// </summary>
         string PrintEquation();
     }
 }

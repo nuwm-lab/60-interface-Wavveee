@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 namespace Geometry
 {
@@ -23,3 +22,4 @@ namespace Geometry
         }
     }
 }
+

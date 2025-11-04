@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Geometry
 {
@@ -9,11 +10,14 @@ namespace Geometry
         protected readonly double[] _coefficients;
         protected const double Epsilon = 1e-12;
 
-        public IReadOnlyList<double> Coefficients => _coefficients;
+        /// <summary>
+        /// Returns a copy of the coefficient list to preserve encapsulation.
+        /// </summary>
+        public IReadOnlyList<double> Coefficients => Array.AsReadOnly(_coefficients);
 
         protected GeometricEquation(params double[] coefficients)
         {
-            if (coefficients == null)
+            if (coefficients is null)
                 throw new ArgumentNullException(nameof(coefficients));
 
             if (coefficients.Length == 0)
@@ -27,7 +31,7 @@ namespace Geometry
 
         protected virtual double Evaluate(params double[] coords)
         {
-            if (coords == null)
+            if (coords is null)
                 throw new ArgumentNullException(nameof(coords));
 
             if (coords.Length != _coefficients.Length - 1)
@@ -55,7 +59,6 @@ namespace Geometry
                     sb.Append("- ");
 
                 double abs = Math.Abs(c);
-
                 if (Math.Abs(abs - 1) > Epsilon)
                     sb.Append($"{abs:0.###}");
 
@@ -75,3 +78,4 @@ namespace Geometry
         public virtual string PrintEquation() => ToString();
     }
 }
+
