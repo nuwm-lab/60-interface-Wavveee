@@ -1,5 +1,11 @@
-public interface IShape
+using System;
+
+namespace Geometry
 {
-    string PrintEquation();
-    bool BelongsToShape(params double[] coordinates);
+    public interface IShape
+    {
+        bool BelongsToShape(params double[] coords);
+
+        string PrintEquation(); // <-- додано, згідно контракту
+    }
 }

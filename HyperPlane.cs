@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+
 namespace Geometry
 {
     public class HyperPlane : GeometricEquation
@@ -9,12 +12,10 @@ namespace Geometry
 
         public override string ToString()
         {
-            // для 4D: x, y, z, w і т.д.
-            var variableNames = Enumerable.Range(0, _coefficients.Length - 1)
-                                         .Select(i => $"x{i+1}")
-                                         .ToArray();
-
-            return FormatEquation(variableNames);
+            var vars = Enumerable.Range(1, _coefficients.Length - 1)
+                                 .Select(i => $"x{i}")
+                                 .ToArray();
+            return FormatEquation(vars);
         }
     }
 }

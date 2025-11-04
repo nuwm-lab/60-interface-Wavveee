@@ -1,3 +1,7 @@
+using System;
+using System.Linq;
+using System.Text;
+
 namespace Geometry
 {
     public abstract class GeometricEquation : IShape
@@ -9,10 +13,8 @@ namespace Geometry
         {
             if (coefficients == null)
                 throw new ArgumentNullException(nameof(coefficients));
-
             if (coefficients.Length == 0)
-                throw new ArgumentException("At least one coefficient must be provided.");
-
+                throw new ArgumentException("At least one coefficient is required.");
             if (coefficients.All(c => Math.Abs(c) < Epsilon))
                 throw new ArgumentException("All coefficients cannot be zero.");
 
@@ -23,11 +25,10 @@ namespace Geometry
         {
             if (coords == null)
                 throw new ArgumentNullException(nameof(coords));
-
             if (coords.Length != _coefficients.Length - 1)
                 throw new ArgumentException($"Expected {_coefficients.Length - 1} coordinates.");
 
-            double sum = _coefficients[^1]; // free term
+            double sum = _coefficients[^1]; // вільний член
             for (int i = 0; i < coords.Length; i++)
                 sum += _coefficients[i] * coords[i];
 
@@ -36,11 +37,11 @@ namespace Geometry
 
         public abstract bool BelongsToShape(params double[] coords);
 
-        protected string FormatEquation(string[] variableNames)
+        protected string FormatEquation(string[] vars)
         {
             var sb = new StringBuilder();
 
-            for (int i = 0; i < _coefficients.Length - 1; i++)
+            for (int i = 0; i < vars.Length; i++)
             {
                 double c = _coefficients[i];
                 if (Math.Abs(c) < Epsilon) continue;
@@ -50,15 +51,18 @@ namespace Geometry
                 else if (c < 0)
                     sb.Append("- ");
 
-                sb.Append($"{Math.Abs(c)}{variableNames[i]}");
+                sb.Append($"{Math.Abs(c):0.###}{vars[i]}");
             }
 
             double free = _coefficients[^1];
             if (Math.Abs(free) >= Epsilon)
-                sb.Append(free >= 0 ? $" + {free}" : $" - {Math.Abs(free)}");
+                sb.Append(free >= 0 ? $" + {free:0.###}" : $" - {Math.Abs(free):0.###}");
 
             sb.Append(" = 0");
             return sb.ToString();
         }
+
+        // ✅ Реалізуємо контракт інтерфейсу
+        public virtual string PrintEquation() => ToString();
     }
 }
