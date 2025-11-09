@@ -3,27 +3,17 @@ using System.Linq;
 
 namespace Geometry
 {
-    public class HyperPlane : GeometricEquation
+    public class HyperPlane : GeometricEquation, ILoggable
     {
-        /// <summary>
-        /// Ініціалізує гіперплощину.
-        /// Порядок коефіцієнтів: [A1, A2, ..., An, An+1], де An+1 — вільний член.
-        /// Якщо кількість коефіцієнтів M, то це (M-1)-вимірна гіперплощина.
-        /// </summary>
         public HyperPlane(params double[] coefficients) : base(coefficients)
         {
-            // Примітка: Обмеження на 5 коефіцієнтів, яке було тут раніше, 
-            // краще прибрати, щоб HyperPlane був узагальненням для N-вимірів.
-            // Якщо потрібна виключно 4D площина, слід створити клас Plane4D.
-            // Залишимо її універсальною для N-вимірів.
         }
         
-        // (Опціонально, якщо ви хочете перевіряти, що хоча б один провідний коефіцієнт ненульовий)
         protected override void ValidateCoefficients()
         {
-            // Перевіряємо, чи має гіперплощина хоча б один вимір (Dimension >= 1)
+            // Мінімум 1D (2 коефіцієнти)
             if (Dimension < 1)
-                throw new ArgumentException("HyperPlane must be in at least 1 dimension (min 2 coefficients).");
+                throw new ArgumentException("HyperPlane requires at least 1 dimension (min 2 coefficients: A1, C).");
         }
 
         public override bool BelongsToShape(params double[] coords)
@@ -31,13 +21,33 @@ namespace Geometry
             return Math.Abs(Evaluate(coords)) < Epsilon;
         }
 
-        public override string ToString()
+        /// <summary>
+        /// Перевизначення ToString() для використання загального формату x1...xN, 
+        /// успадкованого від GeometricEquation.
+        /// </summary>
+        // public override string ToString() => base.ToString(); // Можна не перевизначати, якщо використовуємо x1, x2, ...
+
+        // Реалізація нового абстрактного методу
+        public override GeometricEquation Normalize()
         {
-            // Генеруємо імена змінних x1, x2, ..., xN
-            string[] vars = Enumerable.Range(1, Dimension)
-                                      .Select(i => $"x{i}")
-                                      .ToArray();
-            return FormatEquation(vars);
+            // Норма гіперплощини (вектор [A1, ..., An])
+            double normSq = Coefficients.Take(Dimension).Sum(c => c * c);
+            double norm = Math.Sqrt(normSq);
+
+            // Якщо норма нульова, це означає, що всі провідні коефіцієнти нульові (відловлено ValidateCoefficients)
+            if (Math.Abs(norm) < Epsilon)
+                return this; 
+
+            double[] normalizedCoeffs = Coefficients.Select(c => c / norm).ToArray();
+            
+            // Повертаємо новий екземпляр з нормалізованими коефіцієнтами
+            return new HyperPlane(normalizedCoeffs);
+        }
+
+        // Реалізація інтерфейсу ILoggable
+        public string GetLogDescription()
+        {
+            return $"N-dimensional HyperPlane (N={Dimension}) defined by: {ToString()}";
         }
     }
 }

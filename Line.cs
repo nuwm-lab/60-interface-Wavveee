@@ -3,28 +3,20 @@ using System.Linq;
 
 namespace Geometry
 {
-    public class Line : GeometricEquation
+    public class Line : GeometricEquation, ILoggable
     {
-        /// <summary>
-        /// Ініціалізує 2D пряму: Ax + By + C = 0.
-        /// Порядок коефіцієнтів: [A, B, C].
-        /// </summary>
-        /// <param name="a">Коефіцієнт при x.</param>
-        /// <param name="b">Коефіцієнт при y.</param>
-        /// <param name="c">Вільний член C.</param>
         public Line(double a, double b, double c) : base(a, b, c)
         {
         }
 
         protected override void ValidateCoefficients()
         {
-            // Перевірка інваріанта: пряма має бути 2D.
+            // Чітке повідомлення про помилку
             if (Dimension != 2)
-                throw new ArgumentException("Line must be 2-dimensional (requires 3 coefficients).");
+                throw new ArgumentException($"Line requires exactly 3 coefficients [A, B, C] for 2D space, but received {Coefficients.Count}.");
 
-            // Перевірка інваріанта: A і B не можуть бути одночасно нульовими
             if (Math.Abs(Coefficients[0]) < Epsilon && Math.Abs(Coefficients[1]) < Epsilon)
-                throw new ArgumentException("For a 2D line, A and B cannot both be zero.");
+                throw new ArgumentException("For a 2D line, coefficients A and B (for x and y) cannot both be zero.");
         }
 
         public override bool BelongsToShape(params double[] coords)
@@ -32,9 +24,31 @@ namespace Geometry
             return Math.Abs(Evaluate(coords)) < Epsilon;
         }
 
+        // Перевизначаємо ToString для використання спеціальних імен змінних (x, y)
         public override string ToString()
         {
             return FormatEquation(new[] { "x", "y" });
+        }
+
+        // Реалізація нового абстрактного методу
+        public override GeometricEquation Normalize()
+        {
+            // Норма нормального вектора [A, B]
+            double normSq = Coefficients[0] * Coefficients[0] + Coefficients[1] * Coefficients[1];
+            double norm = Math.Sqrt(normSq);
+
+            if (Math.Abs(norm) < Epsilon)
+                return this; // Має бути відловлено ValidateCoefficients
+
+            double[] normalizedCoeffs = Coefficients.Select(c => c / norm).ToArray();
+            
+            return new Line(normalizedCoeffs[0], normalizedCoeffs[1], normalizedCoeffs[2]);
+        }
+        
+        // Реалізація інтерфейсу ILoggable
+        public string GetLogDescription()
+        {
+            return $"2D Line: {ToString()}";
         }
     }
 }
